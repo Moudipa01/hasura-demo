@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   postgres:
     image: postgres:15
@@ -43,21 +45,20 @@ services:
       - hasura-net
 
   frontend:
-  build:
-    context: ./frontend
-    dockerfile: Dockerfile
-  container_name: frontend-service
-  restart: always
-  depends_on:
-    - backend-service
-  ports:
-    - "3200:3000"
-  environment:
-    NEXT_PUBLIC_BACKEND_URL: http://localhost:3001
-    NEXT_PUBLIC_GRAPHQL_URL: http://localhost:8080/v1/graphql
-  networks:
-    - hasura-net
-
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend-service
+    restart: always
+    depends_on:
+      - backend-service
+    ports:
+      - "3200:3000"
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: http://backend-service:3001
+      NEXT_PUBLIC_GRAPHQL_URL: http://hasura:8080/v1/graphql
+    networks:
+      - hasura-net
 
 volumes:
   postgres_data:

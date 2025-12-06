@@ -10,7 +10,6 @@ const client = axios.create({
   }
 });
 
-// Run GraphQL
 async function runGraphQL(query, variables = {}) {
   const res = await axios.post(
     process.env.HASURA_URL,
@@ -20,7 +19,6 @@ async function runGraphQL(query, variables = {}) {
   console.log(JSON.stringify(res.data, null, 2));
 }
 
-// Insert example
 runGraphQL(`
 mutation MyInsert($title: String!) {
   insert_tasks_one(object: {title: $title}) {
