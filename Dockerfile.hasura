@@ -1,0 +1,10 @@
+FROM hasura/graphql-engine:v2.42.0
+
+WORKDIR /hasura
+
+COPY hasura/migrations /hasura/migrations
+COPY hasura/metadata /hasura/metadata
+
+EXPOSE 8080
+
+CMD ["graphql-engine", "serve"]

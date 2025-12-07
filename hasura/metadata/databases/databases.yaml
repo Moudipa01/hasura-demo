@@ -1,0 +1,7 @@
+version: 2
+databases:
+  default:
+    connection_info:
+      database_url: {}
+    schemas:
+      - public
