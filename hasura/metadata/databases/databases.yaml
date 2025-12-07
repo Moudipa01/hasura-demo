@@ -1,7 +1,9 @@
-version: 2
-databases:
-  default:
+- name: hasura-demo
+  kind: postgres
+  configuration:
     connection_info:
-      database_url: {}
-    schemas:
-      - public
+      database_url:
+        from_env: HASURA_GRAPHQL_DATABASE_URL
+      isolation_level: read-committed
+      use_prepared_statements: false
+  tables: "!include hasura-demo/tables/tables.yaml"

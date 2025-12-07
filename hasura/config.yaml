@@ -1,5 +1,6 @@
 version: 3
-endpoint: http://localhost:8080
+endpoint: https://hasura-demo.onrender.com
+admin_secret: mysecret
 metadata_directory: metadata
 migrations_directory: migrations
 actions:
