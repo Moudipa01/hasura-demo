@@ -9,6 +9,7 @@ type Notification = {
   message: string;
   createdAt?: string;
   created_at?: string;
+  taskTitle?: string | null;
   fireTime?: string;
   fire_time?: string;
   read?: boolean;
@@ -25,7 +26,18 @@ export default function NotificationsPage() {
         `${process.env.NEXT_PUBLIC_NOTIFICATION_API}/notifications`
       );
       const data = await res.json();
-      setNotifications(data);
+
+      // Map backend (snake_case) to frontend shape
+      const mapped: Notification[] = (data || []).map((n: any) => ({
+        id: String(n.id),
+        taskId: n.task_id ?? null,
+        message: n.message ?? "",
+        createdAt: n.created_at ?? n.createdAt ?? new Date().toISOString(),
+        read: (n.status === "read") || false,
+        taskTitle: n.task_title ?? null,
+      }));
+
+      setNotifications(mapped);
     } catch (err) {
       console.error("Failed to fetch notifications:", err);
     } finally {
@@ -39,13 +51,7 @@ export default function NotificationsPage() {
 
   return (
     <div className="max-w-3xl mx-auto">
-      <h1
-        className={
-          theme === "light"
-            ? "text-4xl font-bold mb-8 text-black"
-            : "text-4xl font-bold mb-8 text-white"
-        }
-      >
+      <h1 className={theme === "light" ? "text-4xl font-bold mb-8 text-black" : "text-4xl font-bold mb-8 text-white"}>
         Notifications
       </h1>
 
