@@ -83,19 +83,28 @@ export default function DashboardPage() {
   const [title, setTitle] = useState("");
   const [tag, setTag] = useState("");
   const [dueDate, setDueDate] = useState("");
+  const [dueTime, setDueTime] = useState("");
 
   async function createTask() {
     if (!title.trim()) return;
+    // Combine date + time into an ISO-like datetime string when provided
+    let fullDate: string | null = null;
+    if (dueDate) {
+      const timePart = dueTime && dueTime.trim() ? dueTime : "00:00";
+      fullDate = `${dueDate}T${timePart}:00`;
+    }
+
     await addTask({
       variables: {
         title,
         tag: tag || null,
-        due_date: dueDate || null,
+        due_date: fullDate,
       },
     });
     setTitle("");
     setTag("");
     setDueDate("");
+    setDueTime("");
     refetch();
   }
 
@@ -154,16 +163,29 @@ export default function DashboardPage() {
           onChange={(e) => setTag(e.target.value)}
         />
 
-        <input
-          type="date"
-          className={
-            theme === "light"
-              ? "w-full p-4 rounded-2xl border border-gray-300 bg-white text-black placeholder:text-gray-600 shadow focus:ring-2 focus:ring-blue-300"
-              : "w-full p-4 rounded-2xl border border-slate-700 bg-[#111a2b] text-white placeholder:text-gray-400 shadow focus:ring-2 focus:ring-blue-900"
-          }
-          value={dueDate}
-          onChange={(e) => setDueDate(e.target.value)}
-        />
+        <div className="flex gap-2">
+          <input
+            type="date"
+            className={
+              theme === "light"
+                ? "w-1/2 p-4 rounded-2xl border border-gray-300 bg-white text-black placeholder:text-gray-600 shadow focus:ring-2 focus:ring-blue-300"
+                : "w-1/2 p-4 rounded-2xl border border-slate-700 bg-[#111a2b] text-white placeholder:text-gray-400 shadow focus:ring-2 focus:ring-blue-900"
+            }
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+          />
+
+          <input
+            type="time"
+            className={
+              theme === "light"
+                ? "w-1/2 p-4 rounded-2xl border border-gray-300 bg-white text-black placeholder:text-gray-600 shadow focus:ring-2 focus:ring-blue-300"
+                : "w-1/2 p-4 rounded-2xl border border-slate-700 bg-[#111a2b] text-white placeholder:text-gray-400 shadow focus:ring-2 focus:ring-blue-900"
+            }
+            value={dueTime}
+            onChange={(e) => setDueTime(e.target.value)}
+          />
+        </div>
       </div>
 
       <motion.button
