@@ -5,10 +5,13 @@ import { useTheme } from "../layout";
 
 type Notification = {
   id: string;
-  taskId: number | null;
+  taskId?: number | null;
   message: string;
-  createdAt: string;
-  read: boolean;
+  createdAt?: string;
+  created_at?: string;
+  fireTime?: string;
+  fire_time?: string;
+  read?: boolean;
 };
 
 export default function NotificationsPage() {
@@ -46,28 +49,61 @@ export default function NotificationsPage() {
         Notifications
       </h1>
 
-      {loading && <p className={theme === "light" ? "text-gray-700" : "text-slate-300"}>Loading…</p>}
+      {loading && (
+        <p className={theme === "light" ? "text-gray-700" : "text-slate-300"}>
+          Loading…
+        </p>
+      )}
 
       {!loading && notifications.length === 0 && (
-        <p className={theme === "light" ? "text-gray-500" : "text-slate-400"}>No notifications yet.</p>
+        <p className={theme === "light" ? "text-gray-500" : "text-slate-400"}>
+          No notifications yet.
+        </p>
       )}
 
       <div className="space-y-4">
-        {notifications.map((n) => (
-          <div
-            key={n.id}
-            className={
-              theme === "light"
-                ? "p-4 bg-white border border-gray-200 rounded-xl shadow"
-                : "p-4 bg-[#0b1628] border border-slate-800 rounded-xl shadow"
-            }
-          >
-            <p className={theme === "light" ? "font-medium text-black" : "font-medium text-white"}>{n.message}</p>
-            <p className={theme === "light" ? "text-xs text-gray-600 mt-1" : "text-xs text-slate-400 mt-1"}>
-              {isNaN(Date.parse(n.createdAt)) ? "Invalid Date" : new Date(n.createdAt).toLocaleString()}
-            </p>
-          </div>
-        ))}
+        {notifications.map((n) => {
+          // pick the correct timestamp field
+          const ts =
+            n.createdAt ||
+            n.created_at ||
+            n.fireTime ||
+            n.fire_time ||
+            null;
+
+          const date = ts ? new Date(ts) : null;
+
+          return (
+            <div
+              key={n.id}
+              className={
+                theme === "light"
+                  ? "p-4 bg-white border border-gray-200 rounded-xl shadow"
+                  : "p-4 bg-[#0b1628] border border-slate-800 rounded-xl shadow"
+              }
+            >
+              <p
+                className={
+                  theme === "light"
+                    ? "font-medium text-black"
+                    : "font-medium text-white"
+                }
+              >
+                {n.message}
+              </p>
+
+              <p
+                className={
+                  theme === "light"
+                    ? "text-xs text-gray-600 mt-1"
+                    : "text-xs text-slate-400 mt-1"
+                }
+              >
+                {date ? date.toLocaleString() : "No timestamp"}
+              </p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
