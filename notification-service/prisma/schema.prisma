@@ -32,6 +32,7 @@ model Job {
   id         Int      @id @default(autoincrement())
   task_id    Int
   user_id    Int
+  task_title String? 
   due_date   DateTime?
   fire_at    DateTime
   processed  Boolean  @default(false)

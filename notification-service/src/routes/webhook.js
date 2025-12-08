@@ -38,6 +38,7 @@ export default function webhookRoute(app) {
       await prisma.job.create({
         data: {
           task_id: data.id,
+          task_title: data.title ?? null,
           user_id: userId,
           due_date: dueDate,   // MUST be a Date object
           fire_at: fireAt,
@@ -46,12 +47,13 @@ export default function webhookRoute(app) {
       });
 
       console.log(
-        `Job queued for task ${data.id} (fire at ${fireAt.toISOString()})`
+        `Job queued for task ${data.id}${data.title ? ` (${data.title})` : ''} (fire at ${fireAt.toISOString()})`
       );
 
       return res.json({
         status: "queued",
         task_id: data.id,
+        task_title: data.title ?? null,
         fireAt: fireAt.toISOString(),
       });
 

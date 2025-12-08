@@ -15,11 +15,15 @@ export default function startWorker() {
       });
 
       for (const job of dueJobs) {
-        // Create a notification for the job
+        // Create a notification for the job. Prefer the stored task_title when available.
+        const message = job.task_title
+          ? `Reminder: ${job.task_title}`
+          : `Reminder for task ${job.task_id}`;
+
         await prisma.notification.create({
           data: {
             user_id: job.user_id,
-            message: `Reminder for task ${job.task_id}`,
+            message,
             status: "queued",
             task_id: job.task_id,
           }
