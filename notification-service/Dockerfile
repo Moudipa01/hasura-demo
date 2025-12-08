@@ -5,9 +5,11 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 
-RUN npx prisma generate
-
+# Copy rest of the project INCLUDING prisma folder
 COPY . .
+
+# Now generate the correct Prisma client for Linux
+RUN npx prisma generate
 
 EXPOSE 8000
 
