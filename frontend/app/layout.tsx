@@ -10,6 +10,7 @@ import React, {
   ReactNode,
 } from "react";
 import Link from "next/link";
+import toast, { Toaster } from "react-hot-toast";
 
 type ThemeContextType = {
   theme: "light" | "dark";
@@ -77,7 +78,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 <nav className="mt-10 space-y-3">
                   <NavItem href="/" label="Dashboard" />
                   <NavItem href="/analytics" label="Analytics" />
+                  <NavItem href="/notifications" label="Notifications" />
+                  <NavItem href="/settings/notifications" label="Notification Settings" />
                 </nav>
+
 
                 <div className="absolute bottom-6 left-6">
                   <button
@@ -98,12 +102,30 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               >
                 {children}
               </main>
+              {/* Toaster renders toast notifications from anywhere in the app */}
+              <Toaster />
             </div>
           </ThemeContext.Provider>
         </ApolloProvider>
       </body>
     </html>
   );
+}
+
+// Helper: re-usable createTask wrapper that triggers a success toast
+// Usage example in a page/component:
+// await createTask(title, (payload) => addTask(payload), () => refetch());
+export async function createTask(
+  title: string,
+  addTask: (payload: any) => Promise<any>,
+  refetch: () => void
+) {
+  if (!title || !title.trim()) return;
+
+  // call the provided mutation/handler
+  await addTask({ title });
+  toast.success("Task added successfully!");
+  refetch();
 }
 
 function NavItem({ href, label }: { href: string; label: string }) {
