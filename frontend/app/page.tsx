@@ -16,15 +16,17 @@ type Task = {
 
 const GET_TASKS = gql`
   query {
-    tasks {
+    tasks(order_by: { created_at: desc }) {
       id
       title
       is_completed
       tag
       due_date
+      created_at
     }
   }
 `;
+
 
 const INSERT_TASK = gql`
   mutation ($title: String!, $tag: String, $due_date: date) {

@@ -49,10 +49,11 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <aside
                 className={
                   theme === "light"
-                    ? "w-64 min-h-screen bg-white border-r border-gray-200 p-6"
-                    : "w-64 min-h-screen bg-[#0b1628] border-r border-slate-800 p-6"
+                    ? "w-64 h-screen sticky top-0 bg-white border-r border-gray-200 p-6"
+                    : "w-64 h-screen sticky top-0 bg-[#0b1628] border-r border-slate-800 p-6"
                 }
               >
+
                 <h1
                   className={
                     theme === "light"
