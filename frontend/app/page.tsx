@@ -22,7 +22,7 @@ const GET_TASKS = gql`
       is_completed
       tag
       due_date
-      created_at
+      created_at  
     }
   }
 `;
