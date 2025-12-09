@@ -4,113 +4,122 @@ import { useEffect, useState } from "react";
 import { useTheme } from "../layout";
 
 type Notification = {
-  id: string;
-  taskId?: number | null;
-  message: string;
-  createdAt?: string;
-  created_at?: string;
-  taskTitle?: string | null;
-  fireTime?: string;
-  fire_time?: string;
-  read?: boolean;
+    id: string;
+    taskId?: number | null;
+    message: string;
+    createdAt?: string;
+    created_at?: string;
+    taskTitle?: string | null;
+    fireTime?: string;
+    fire_time?: string;
+    read?: boolean;
 };
 
 export default function NotificationsPage() {
-  const { theme } = useTheme();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
+    const { theme } = useTheme();
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [loading, setLoading] = useState(true);
 
-  async function fetchNotifications() {
-    try {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_NOTIFICATION_API}/notifications`
-      );
-      const data = await res.json();
+    async function fetchNotifications() {
+        try {
+            const res = await fetch(
+                `${process.env.NEXT_PUBLIC_NOTIFICATION_API}/notifications`
+            );
+            const data = await res.json();
 
-      // Map backend (snake_case) to frontend shape
-      const mapped: Notification[] = (data || []).map((n: any) => ({
-        id: String(n.id),
-        taskId: n.task_id ?? null,
-        message: n.message ?? "",
-        createdAt: n.created_at ?? n.createdAt ?? new Date().toISOString(),
-        read: (n.status === "read") || false,
-        taskTitle: n.task_title ?? null,
-      }));
+            type BackendNotification = {
+                id: number | string;
+                user_id: number;
+                message: string;
+                status?: string;
+                task_id?: number | null;
+                created_at?: string;
+                task_title?: string | null;
+            };
 
-      setNotifications(mapped);
-    } catch (err) {
-      console.error("Failed to fetch notifications:", err);
-    } finally {
-      setLoading(false);
+            const mapped: Notification[] = (data || []).map((n: BackendNotification) => ({
+                id: String(n.id),
+                taskId: n.task_id ?? null,
+                message: n.message ?? "",
+                createdAt: n.created_at ?? new Date().toISOString(),
+                read: (n.status === "read") || false,
+                taskTitle: n.task_title ?? null,
+            }));
+
+            setNotifications(mapped);
+        } catch (err) {
+            console.error("Failed to fetch notifications:", err);
+        } finally {
+            setLoading(false);
+        }
     }
-  }
 
-  useEffect(() => {
-    fetchNotifications();
-  }, []);
+    useEffect(() => {
+        fetchNotifications();
+    }, []);
 
-  return (
-    <div className="max-w-3xl mx-auto">
-      <h1 className={theme === "light" ? "text-4xl font-bold mb-8 text-black" : "text-4xl font-bold mb-8 text-white"}>
-        Notifications
-      </h1>
+    return (
+        <div className="max-w-3xl mx-auto">
+            <h1 className={theme === "light" ? "text-4xl font-bold mb-8 text-black" : "text-4xl font-bold mb-8 text-white"}>
+                Notifications
+            </h1>
 
-      {loading && (
-        <p className={theme === "light" ? "text-gray-700" : "text-slate-300"}>
-          Loading…
-        </p>
-      )}
+            {loading && (
+                <p className={theme === "light" ? "text-gray-700" : "text-slate-300"}>
+                    Loading…
+                </p>
+            )}
 
-      {!loading && notifications.length === 0 && (
-        <p className={theme === "light" ? "text-gray-500" : "text-slate-400"}>
-          No notifications yet.
-        </p>
-      )}
+            {!loading && notifications.length === 0 && (
+                <p className={theme === "light" ? "text-gray-500" : "text-slate-400"}>
+                    No notifications yet.
+                </p>
+            )}
 
-      <div className="space-y-4">
-        {notifications.map((n) => {
-          // pick the correct timestamp field
-          const ts =
-            n.createdAt ||
-            n.created_at ||
-            n.fireTime ||
-            n.fire_time ||
-            null;
+            <div className="space-y-4">
+                {notifications.map((n) => {
+                    // pick the correct timestamp field
+                    const ts =
+                        n.createdAt ||
+                        n.created_at ||
+                        n.fireTime ||
+                        n.fire_time ||
+                        null;
 
-          const date = ts ? new Date(ts) : null;
+                    const date = ts ? new Date(ts) : null;
 
-          return (
-            <div
-              key={n.id}
-              className={
-                theme === "light"
-                  ? "p-4 bg-white border border-gray-200 rounded-xl shadow"
-                  : "p-4 bg-[#0b1628] border border-slate-800 rounded-xl shadow"
-              }
-            >
-              <p
-                className={
-                  theme === "light"
-                    ? "font-medium text-black"
-                    : "font-medium text-white"
-                }
-              >
-                {n.message}
-              </p>
+                    return (
+                        <div
+                            key={n.id}
+                            className={
+                                theme === "light"
+                                    ? "p-4 bg-white border border-gray-200 rounded-xl shadow"
+                                    : "p-4 bg-[#0b1628] border border-slate-800 rounded-xl shadow"
+                            }
+                        >
+                            <p
+                                className={
+                                    theme === "light"
+                                        ? "font-medium text-black"
+                                        : "font-medium text-white"
+                                }
+                            >
+                                {n.taskTitle ? `Reminder: ${n.taskTitle}` : n.message}
+                            </p>
 
-              <p
-                className={
-                  theme === "light"
-                    ? "text-xs text-gray-600 mt-1"
-                    : "text-xs text-slate-400 mt-1"
-                }
-              >
-                {date ? date.toLocaleString() : "No timestamp"}
-              </p>
+                            <p
+                                className={
+                                    theme === "light"
+                                        ? "text-xs text-gray-600 mt-1"
+                                        : "text-xs text-slate-400 mt-1"
+                                }
+                            >
+                                {date ? date.toLocaleString() : "No timestamp"}
+                            </p>
+                        </div>
+                    );
+                })}
             </div>
-          );
-        })}
-      </div>
-    </div>
-  );
+        </div>
+    );
 }
