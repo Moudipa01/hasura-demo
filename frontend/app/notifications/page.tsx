@@ -56,6 +56,8 @@ export default function NotificationsPage() {
 
     useEffect(() => {
         fetchNotifications();
+        const interval = setInterval(fetchNotifications, 15000); // poll every 15 seconds
+        return () => clearInterval(interval);
     }, []);
 
     return (
