@@ -1,7 +1,6 @@
 import cron from "node-cron";
 import prisma from "../db.js";
 import { mailer } from "../utils/email.js";
-import queue from "../utils/queue.js";
 
 export default function startWorker() {
   queue.process(async (job) => {
