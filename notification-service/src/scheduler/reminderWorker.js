@@ -1,49 +1,90 @@
 import cron from "node-cron";
 import prisma from "../db.js";
+import { mailer } from "../utils/email.js";
+import queue from "../utils/queue.js";
 
-// Starts the reminder worker. Currently schedules a simple cron job
-// that runs every minute and logs activity. This is a safe placeholder
-// to avoid registering routes from the scheduler file and to prevent
-// `app` being undefined when `startWorker()` is invoked from `server.js`.
 export default function startWorker() {
-  // Processing function: find due jobs, create a Notification, mark processed.
+  queue.process(async (job) => {
+    const { taskId, title, dueDate, userEmail } = job.data;
+
+    // 1. Store notification in DB
+    await prisma.notification.create({
+      data: {
+        task_id: taskId,
+        message: `Reminder: ${title} is due soon`,
+      },
+    });
+
+    // 2. Send Email if email is provided
+    if (userEmail) {
+      try {
+        await mailer.sendMail({
+          from: process.env.EMAIL_FROM,
+          to: userEmail,
+          subject: `Task Reminder: ${title}`,
+          text: `Your task "${title}" is due on ${dueDate}.`,
+        });
+
+        console.log("Email sent to:", userEmail);
+      } catch (err) {
+        console.error("Email sending failed:", err);
+      }
+    }
+
+    return true;
+  });
+
   async function processDueJobs() {
     console.log("[reminderWorker] tick - checking for due reminders...");
     try {
       const dueJobs = await prisma.job.findMany({
-        where: { processed: false, fire_at: { lte: new Date() } }
+        where: { processed: false, fire_at: { lte: new Date() } },
       });
 
       for (const job of dueJobs) {
-        // Create a notification for the job. Prefer the stored task_title when available.
         const message = job.task_title
           ? `Reminder: ${job.task_title}`
           : `Reminder for task ${job.task_id}`;
 
+        // Create a notification (status queued)
         await prisma.notification.create({
           data: {
             user_id: job.user_id,
             message,
             status: "queued",
             task_id: job.task_id,
-          }
+          },
         });
 
-        // Mark job processed
-        await prisma.job.update({ where: { id: job.id }, data: { processed: true } });
+        // Add job to queue — triggers email + DB write
+        await queue.add({
+          taskId: job.task_id,
+          title: job.task_title,
+          dueDate: job.fire_at,
+          userEmail: job.user_email,
+        });
 
-        console.log(`[reminderWorker] processed job ${job.id} (task ${job.task_id})`);
+        // Mark job processed so it does not run again
+        await prisma.job.update({
+          where: { id: job.id },
+          data: { processed: true },
+        });
+
+        console.log(
+          `[reminderWorker] processed job ${job.id} (task ${job.task_id})`
+        );
       }
-
     } catch (err) {
       console.error("[reminderWorker] error:", err);
     }
   }
 
-  // Run immediately once so tests can verify behavior without waiting for the cron tick.
-  processDueJobs().catch(err => console.error("[reminderWorker] initial run error:", err));
+  // Run immediately (no waiting for cron)
+  processDueJobs().catch((err) =>
+    console.error("[reminderWorker] initial run error:", err)
+  );
 
-  // Schedule to run every minute
+  // Run every 1 minute
   cron.schedule("* * * * *", processDueJobs);
 
   console.log("Reminder worker started (cron scheduled every minute)");

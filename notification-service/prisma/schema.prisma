@@ -3,7 +3,6 @@ generator client {
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -13,12 +12,11 @@ model UserPreferences {
   id              Int      @id @default(autoincrement())
   user_id         Int      @unique
   email           String
-  enabled         Boolean   @default(true)
-  reminder_offset Int       @default(30)
-  created_at      DateTime  @default(now())
-  updated_at      DateTime  @updatedAt
+  enabled         Boolean  @default(true)
+  reminder_offset Int      @default(30)
+  created_at      DateTime @default(now())
+  updated_at      DateTime @updatedAt
 }
-
 
 model Notification {
   id         Int      @id @default(autoincrement())
@@ -30,12 +28,13 @@ model Notification {
 }
 
 model Job {
-  id         Int      @id @default(autoincrement())
+  id         Int       @id @default(autoincrement())
   task_id    Int
   user_id    Int
-  task_title String? 
+  user_email String?
   due_date   DateTime?
   fire_at    DateTime
-  processed  Boolean  @default(false)
-  created_at DateTime @default(now())
+  processed  Boolean   @default(false)
+  created_at DateTime  @default(now())
+  task_title String?
 }
