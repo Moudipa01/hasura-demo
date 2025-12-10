@@ -10,14 +10,15 @@ datasource db {
 }
 
 model UserPreferences {
-  id             Int      @id @default(autoincrement())
-  user_id        Int
-  email          String
-  enabled        Boolean   @default(true)
-  reminder_offset Int      @default(30)
-  created_at     DateTime  @default(now())
-  updated_at     DateTime  @updatedAt
+  id              Int      @id @default(autoincrement())
+  user_id         Int      @unique
+  email           String
+  enabled         Boolean   @default(true)
+  reminder_offset Int       @default(30)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
 }
+
 
 model Notification {
   id         Int      @id @default(autoincrement())
